@@ -9,8 +9,6 @@
 
 It supports workflows related to users, clubs, events, club memberships, event registrations, attendance, and notifications.
 
-The project was developed as part of engineering coursework to apply practical concepts in **frontend development, backend development, REST APIs, database management, and software testing**.
-
 ---
 
 ## 🎯 Objectives
