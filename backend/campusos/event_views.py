@@ -1,3 +1,4 @@
+﻿
 from django.utils import timezone
 from django.db import IntegrityError
 
@@ -13,6 +14,9 @@ from campusos.models import (
     EventRegistrations,
     Users,
 )
+
+from campusos.email_utils import send_notification_email
+from campusos.notification_utils import create_notification
 
 
 def event_data(event):
@@ -65,20 +69,15 @@ def can_manage_event(user, event):
 def event_list(request):
 
     if request.method == "GET":
-
         if request.user.role == "STUDENT":
-            events = Events.objects.filter(
-                status="PUBLISHED"
-            )
+            events = Events.objects.filter(status="PUBLISHED")
 
         elif request.user.role == "CLUB_ADMIN":
             club_ids = Clubs.objects.filter(
                 admin_id=request.user.id
             ).values_list("id", flat=True)
 
-            events = Events.objects.filter(
-                club_id__in=club_ids
-            )
+            events = Events.objects.filter(club_id__in=club_ids)
 
         elif request.user.role == "FACULTY_COORDINATOR":
             club_ids = Clubs.objects.filter(
@@ -91,7 +90,7 @@ def event_list(request):
                     "PENDING_APPROVAL",
                     "APPROVED",
                     "PUBLISHED",
-                ]
+                ],
             )
 
         else:
@@ -99,17 +98,13 @@ def event_list(request):
 
         return Response([
             event_data(event)
-            for event in events.order_by(
-                "event_date",
-                "event_time"
-            )
+            for event in events.order_by("event_date", "event_time")
         ])
 
-    # CREATE EVENT
     if request.user.role not in ["CLUB_ADMIN", "SYSTEM_ADMIN"]:
         return Response(
             {"message": "Only club admins can create events"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     club_id = request.data.get("club_id")
@@ -119,7 +114,7 @@ def event_list(request):
     except (Clubs.DoesNotExist, ValueError, TypeError):
         return Response(
             {"message": "Club not found"},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     if (
@@ -128,7 +123,7 @@ def event_list(request):
     ):
         return Response(
             {"message": "You cannot create events for this club"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     required = [
@@ -143,10 +138,15 @@ def event_list(request):
         if not request.data.get(field):
             return Response(
                 {"message": f"{field} is required"},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
     try:
+        capacity = int(request.data["capacity"])
+
+        if capacity <= 0:
+            raise ValueError("Capacity must be positive")
+
         event = Events.objects.create(
             club_id=club.id,
             title=request.data["title"],
@@ -154,7 +154,7 @@ def event_list(request):
             event_date=request.data["event_date"],
             event_time=request.data["event_time"],
             venue=request.data["venue"],
-            capacity=int(request.data["capacity"]),
+            capacity=capacity,
             eligibility=request.data.get("eligibility"),
             status="DRAFT",
             created_by_id=request.user.id,
@@ -162,7 +162,7 @@ def event_list(request):
     except (ValueError, TypeError, IntegrityError):
         return Response(
             {"message": "Invalid event details"},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     return Response(
@@ -170,7 +170,7 @@ def event_list(request):
             "message": "Event created successfully",
             "event": event_data(event),
         },
-        status=status.HTTP_201_CREATED
+        status=status.HTTP_201_CREATED,
     )
 
 
@@ -184,7 +184,7 @@ def event_detail(request, event_id):
     if not event:
         return Response(
             {"message": "Event not found"},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     if (
@@ -193,7 +193,7 @@ def event_detail(request, event_id):
     ):
         return Response(
             {"message": "You cannot view this event"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     return Response(event_data(event))
@@ -207,7 +207,7 @@ def my_events(request):
     if request.user.role != "CLUB_ADMIN":
         return Response(
             {"message": "Only club admins can view their events"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     club_ids = Clubs.objects.filter(
@@ -218,10 +218,7 @@ def my_events(request):
         club_id__in=club_ids
     ).order_by("event_date", "event_time")
 
-    return Response([
-        event_data(event)
-        for event in events
-    ])
+    return Response([event_data(event) for event in events])
 
 
 # GET /api/events/pending
@@ -232,7 +229,7 @@ def pending_events(request):
     if request.user.role != "FACULTY_COORDINATOR":
         return Response(
             {"message": "Faculty coordinator access required"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     club_ids = Clubs.objects.filter(
@@ -241,13 +238,10 @@ def pending_events(request):
 
     events = Events.objects.filter(
         club_id__in=club_ids,
-        status="PENDING_APPROVAL"
+        status="PENDING_APPROVAL",
     )
 
-    return Response([
-        event_data(event)
-        for event in events
-    ])
+    return Response([event_data(event) for event in events])
 
 
 # GET /api/events/approved
@@ -258,17 +252,12 @@ def approved_events(request):
     if request.user.role != "SYSTEM_ADMIN":
         return Response(
             {"message": "System admin access required"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
-    events = Events.objects.filter(
-        status="APPROVED"
-    )
+    events = Events.objects.filter(status="APPROVED")
 
-    return Response([
-        event_data(event)
-        for event in events
-    ])
+    return Response([event_data(event) for event in events])
 
 
 # PATCH /api/events/<event_id>/submit
@@ -281,7 +270,7 @@ def submit_event(request, event_id):
     if not event:
         return Response(
             {"message": "Event not found"},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     if (
@@ -290,18 +279,30 @@ def submit_event(request, event_id):
     ):
         return Response(
             {"message": "Club admin access required"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     if event.status != "DRAFT":
         return Response(
             {"message": "Only draft events can be submitted"},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     event.status = "PENDING_APPROVAL"
     event.rejection_reason = None
     event.save(update_fields=["status", "rejection_reason"])
+
+    club = Clubs.objects.filter(id=event.club_id).first()
+
+    if club and club.faculty_coordinator_id:
+        create_notification(
+            user_id=club.faculty_coordinator_id,
+            title="Event awaiting approval",
+            message=(
+                f"'{event.title}' has been submitted for approval."
+            ),
+            notification_type="EVENT_APPROVAL",
+        )
 
     return Response({
         "message": "Event submitted for faculty approval",
@@ -319,7 +320,7 @@ def approve_event(request, event_id):
     if not event:
         return Response(
             {"message": "Event not found"},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     club = Clubs.objects.filter(id=event.club_id).first()
@@ -331,13 +332,13 @@ def approve_event(request, event_id):
     ):
         return Response(
             {"message": "Faculty coordinator access required"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     if event.status != "PENDING_APPROVAL":
         return Response(
             {"message": "Only pending events can be approved"},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     event.status = "APPROVED"
@@ -349,6 +350,32 @@ def approve_event(request, event_id):
         "approved_by",
         "approved_at",
     ])
+
+    create_notification(
+        user_id=event.created_by_id,
+        title="Event approved",
+        message=f"Your event '{event.title}' has been approved.",
+        notification_type="EVENT_APPROVAL",
+    )
+
+    creator = Users.objects.filter(
+        id=event.created_by_id
+    ).first()
+
+    if creator and creator.email:
+        send_notification_email(
+            recipient=creator.email,
+            subject=f"CampusOS: Event approved - {event.title}",
+            message=(
+                f"Hello {creator.name or 'User'},\n\n"
+                f"Your event '{event.title}' has been approved "
+                "by the faculty coordinator.\n\n"
+                f"Event date: {event.event_date}\n"
+                f"Event time: {event.event_time}\n"
+                f"Venue: {event.venue}\n\n"
+                "Please log in to CampusOS to view the event details."
+            ),
+        )
 
     return Response({
         "message": "Event approved successfully",
@@ -366,7 +393,7 @@ def reject_event(request, event_id):
     if not event:
         return Response(
             {"message": "Event not found"},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     if (
@@ -375,13 +402,13 @@ def reject_event(request, event_id):
     ):
         return Response(
             {"message": "Faculty coordinator access required"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     if event.status != "PENDING_APPROVAL":
         return Response(
             {"message": "Only pending events can be rejected"},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     event.status = "REJECTED"
@@ -391,6 +418,35 @@ def reject_event(request, event_id):
         "status",
         "rejection_reason",
     ])
+
+    reason = event.rejection_reason or "No reason provided."
+
+    create_notification(
+        user_id=event.created_by_id,
+        title="Event rejected",
+        message=(
+            f"Your event '{event.title}' was rejected. "
+            f"Reason: {reason}"
+        ),
+        notification_type="EVENT_APPROVAL",
+    )
+
+    creator = Users.objects.filter(
+        id=event.created_by_id
+    ).first()
+
+    if creator and creator.email:
+        send_notification_email(
+            recipient=creator.email,
+            subject=f"CampusOS: Event rejected - {event.title}",
+            message=(
+                f"Hello {creator.name or 'User'},\n\n"
+                f"Your event '{event.title}' has been rejected "
+                "by the faculty coordinator.\n\n"
+                f"Reason: {reason}\n\n"
+                "Please log in to CampusOS to review the decision."
+            ),
+        )
 
     return Response({
         "message": "Event rejected",
@@ -406,7 +462,7 @@ def publish_event(request, event_id):
     if request.user.role != "SYSTEM_ADMIN":
         return Response(
             {"message": "System admin access required"},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     event = Events.objects.filter(id=event_id).first()
@@ -414,17 +470,24 @@ def publish_event(request, event_id):
     if not event:
         return Response(
             {"message": "Event not found"},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     if event.status != "APPROVED":
         return Response(
             {"message": "Only approved events can be published"},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     event.status = "PUBLISHED"
     event.save(update_fields=["status"])
+
+    create_notification(
+        user_id=event.created_by_id,
+        title="Event published",
+        message=f"Your event '{event.title}' is now published.",
+        notification_type="EVENT_APPROVAL",
+    )
 
     return Response({
         "message": "Event published successfully",
@@ -440,7 +503,7 @@ def list_attendance(request, event_id):
     if request.user.role != "CLUB_ADMIN":
         return Response(
             {"message": "Only club admins can view attendance."},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     event = Events.objects.filter(id=event_id).first()
@@ -448,7 +511,7 @@ def list_attendance(request, event_id):
     if not event:
         return Response(
             {"message": "Event not found."},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     club = Clubs.objects.filter(id=event.club_id).first()
@@ -456,7 +519,7 @@ def list_attendance(request, event_id):
     if not club or club.admin_id != request.user.id:
         return Response(
             {"message": "You do not administer this event."},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     records = Attendance.objects.filter(
@@ -481,7 +544,7 @@ def mark_attendance(request, event_id):
     if request.user.role != "CLUB_ADMIN":
         return Response(
             {"message": "Only club admins can mark attendance."},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     event = Events.objects.filter(id=event_id).first()
@@ -489,7 +552,7 @@ def mark_attendance(request, event_id):
     if not event:
         return Response(
             {"message": "Event not found."},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     club = Clubs.objects.filter(id=event.club_id).first()
@@ -497,7 +560,7 @@ def mark_attendance(request, event_id):
     if not club or club.admin_id != request.user.id:
         return Response(
             {"message": "You do not administer this event."},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     student_id = request.data.get("student_id")
@@ -506,24 +569,24 @@ def mark_attendance(request, event_id):
     if not student_id:
         return Response(
             {"message": "student_id is required."},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     if attendance_status not in ["PRESENT", "ABSENT"]:
         return Response(
             {"message": "Status must be PRESENT or ABSENT."},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     registered = EventRegistrations.objects.filter(
         event_id=event_id,
-        student_id=student_id
+        student_id=student_id,
     ).exclude(status="CANCELLED").exists()
 
     if not registered:
         return Response(
             {"message": "This student is not registered for the event."},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     record, created = Attendance.objects.update_or_create(
@@ -533,7 +596,7 @@ def mark_attendance(request, event_id):
             "status": attendance_status,
             "marked_by_id": request.user.id,
             "marked_at": timezone.now(),
-        }
+        },
     )
 
     return Response(
@@ -549,7 +612,7 @@ def mark_attendance(request, event_id):
             status.HTTP_201_CREATED
             if created
             else status.HTTP_200_OK
-        )
+        ),
     )
 
 
@@ -563,13 +626,13 @@ def list_event_registrations(request, event_id):
     if not event:
         return Response(
             {"message": "Event not found."},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     if not can_manage_event(request.user, event):
         return Response(
             {"message": "You are not allowed to view these registrations."},
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     registrations = EventRegistrations.objects.filter(
@@ -593,7 +656,9 @@ def list_event_registrations(request, event_id):
         registration_list.append({
             "registration_id": registration.id,
             "student_id": registration.student_id,
-            "student_name": student.name if student else "Unknown Student",
+            "student_name": (
+                student.name if student else "Unknown Student"
+            ),
             "student_email": student.email if student else "",
             "status": registration.status,
             "registered_at": registration.registered_at,
@@ -603,3 +668,4 @@ def list_event_registrations(request, event_id):
         "event": event_data(event),
         "registrations": registration_list,
     })
+

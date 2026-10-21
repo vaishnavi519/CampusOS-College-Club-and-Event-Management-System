@@ -1,4 +1,4 @@
-
+﻿
 from django.utils import timezone
 from django.db import connection, transaction
 
@@ -13,6 +13,9 @@ from campusos.models import (
     Attendance,
     ClubMemberships,
 )
+
+from campusos.email_utils import send_notification_email
+from campusos.notification_utils import create_notification
 
 
 def event_data(event):
@@ -63,10 +66,15 @@ def my_registrations(request):
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def cancel_registration(request, registration_id):
-    registration = EventRegistrations.objects.filter(
-        id=registration_id,
-        student_id=request.user.id,
-    ).first()
+    registration = (
+        EventRegistrations.objects
+        .filter(
+            id=registration_id,
+            student_id=request.user.id,
+        )
+        .select_related("event")
+        .first()
+    )
 
     if not registration:
         return Response(
@@ -83,6 +91,17 @@ def cancel_registration(request, registration_id):
     registration.status = "CANCELLED"
     registration.cancelled_at = timezone.now()
     registration.save(update_fields=["status", "cancelled_at"])
+
+    create_notification(
+        user_id=request.user.id,
+        title="Event registration cancelled",
+        message=(
+            f"Your registration for '{registration.event.title}' "
+            "has been cancelled successfully."
+        ),
+        notification_type="EVENT_REGISTRATION",
+        link="/my-registrations",
+    )
 
     return Response({
         "message": "Registration cancelled successfully.",
@@ -186,10 +205,12 @@ def register_for_event(request, event_id):
             status=status.HTTP_403_FORBIDDEN,
         )
 
-    event = Events.objects.filter(
-        id=event_id,
-        status="PUBLISHED",
-    ).first()
+    event = (
+        Events.objects
+        .filter(id=event_id, status="PUBLISHED")
+        .select_related("club")
+        .first()
+    )
 
     if not event:
         return Response(
@@ -197,9 +218,9 @@ def register_for_event(request, event_id):
             status=status.HTTP_404_NOT_FOUND,
         )
 
+    # Reserve the registration in the database first.
     with transaction.atomic():
         with connection.cursor() as cursor:
-
             cursor.execute(
                 """
                 SELECT status
@@ -214,7 +235,10 @@ def register_for_event(request, event_id):
 
             if existing and existing[0] != "CANCELLED":
                 return Response(
-                    {"message": "You are already registered for this event."},
+                    {
+                        "message":
+                            "You are already registered for this event."
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -258,7 +282,36 @@ def register_for_event(request, event_id):
                     [event_id, request.user.id, now],
                 )
 
+    # Save an in-app notification after registration succeeds.
+    create_notification(
+        user_id=request.user.id,
+        title="Event registration confirmed",
+        message=f"You have successfully registered for '{event.title}'.",
+        notification_type="EVENT_REGISTRATION",
+        link="/my-registrations",
+    )
+
+    # Email the student after the registration succeeds.
+    if request.user.email:
+        club_name = event.club.name if event.club_id else "CampusOS"
+
+        send_notification_email(
+            recipient=request.user.email,
+            subject=f"CampusOS: Registration confirmed - {event.title}",
+            message=(
+                f"Hello {request.user.name or 'Student'},\n\n"
+                f"Your registration for '{event.title}' is confirmed.\n\n"
+                f"Club: {club_name}\n"
+                f"Date: {event.event_date}\n"
+                f"Time: {event.event_time}\n"
+                f"Venue: {event.venue}\n\n"
+                "Please log in to CampusOS for your event details.\n\n"
+                "Thank you,\nCampusOS Team"
+            ),
+        )
+
     return Response(
         {"message": "Successfully registered for the event."},
         status=status.HTTP_201_CREATED,
     )
+

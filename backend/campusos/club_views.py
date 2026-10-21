@@ -1,4 +1,4 @@
-
+﻿
 from django.db import IntegrityError
 from django.utils import timezone
 
@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from campusos.models import Clubs, ClubMemberships, Users
+from campusos.email_utils import send_notification_email
+from campusos.notification_utils import create_notification
 
 
 def club_data(club):
@@ -59,7 +61,12 @@ def can_manage_club(user, club):
 def list_coordinators(request):
     if request.user.role not in ["CLUB_ADMIN", "SYSTEM_ADMIN"]:
         return Response(
-            {"message": "Only club admins or system admins can view faculty coordinators"},
+            {
+                "message": (
+                    "Only club admins or system admins "
+                    "can view faculty coordinators"
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -87,7 +94,9 @@ def club_list(request):
     elif user.role == "CLUB_ADMIN":
         clubs = Clubs.objects.filter(admin_id=user.id)
     elif user.role == "FACULTY_COORDINATOR":
-        clubs = Clubs.objects.filter(faculty_coordinator_id=user.id)
+        clubs = Clubs.objects.filter(
+            faculty_coordinator_id=user.id
+        )
     else:
         clubs = Clubs.objects.filter(status="ACTIVE")
 
@@ -106,7 +115,9 @@ def club_detail(request, club_id):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    if club.status != "ACTIVE" and not can_manage_club(request.user, club):
+    if club.status != "ACTIVE" and not can_manage_club(
+        request.user, club
+    ):
         return Response(
             {"message": "You are not allowed to view this club"},
             status=status.HTTP_403_FORBIDDEN,
@@ -122,7 +133,12 @@ def create_club(request):
 
     if user.role not in ["CLUB_ADMIN", "SYSTEM_ADMIN"]:
         return Response(
-            {"message": "Only club admins or system admins can create clubs"},
+            {
+                "message": (
+                    "Only club admins or system admins "
+                    "can create clubs"
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -142,7 +158,12 @@ def create_club(request):
 
     if not name or not category or not faculty_id:
         return Response(
-            {"message": "Name, category and faculty_coordinator_id are required"},
+            {
+                "message": (
+                    "Name, category and faculty_coordinator_id "
+                    "are required"
+                )
+            },
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -190,6 +211,13 @@ def create_club(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    create_notification(
+        user_id=faculty.id,
+        title="Club awaiting approval",
+        message=f"The club '{club.name}' has been submitted for review.",
+        notification_type="EVENT_APPROVAL",
+    )
+
     return Response(
         {
             "message": "Club created and submitted for approval",
@@ -212,7 +240,12 @@ def apply_membership(request, club_id):
         club = Clubs.objects.get(id=club_id, status="ACTIVE")
     except Clubs.DoesNotExist:
         return Response(
-            {"message": "Active club not found. The club may still be awaiting approval."},
+            {
+                "message": (
+                    "Active club not found. The club may still "
+                    "be awaiting approval."
+                )
+            },
             status=status.HTTP_404_NOT_FOUND,
         )
 
@@ -224,7 +257,12 @@ def apply_membership(request, club_id):
     if existing:
         if existing.status in ["PENDING", "APPROVED"]:
             return Response(
-                {"message": "You already have a pending or approved membership"},
+                {
+                    "message": (
+                        "You already have a pending or approved "
+                        "membership"
+                    )
+                },
                 status=status.HTTP_409_CONFLICT,
             )
 
@@ -253,6 +291,17 @@ def apply_membership(request, club_id):
                 {"message": "Membership application already exists"},
                 status=status.HTTP_409_CONFLICT,
             )
+
+    if club.admin_id:
+        create_notification(
+            user_id=club.admin_id,
+            title="New club membership application",
+            message=(
+                f"{request.user.name or 'A student'} has applied "
+                f"to join '{club.name}'."
+            ),
+            notification_type="MEMBERSHIP_SUBMITTED",
+        )
 
     return Response(
         {
@@ -344,6 +393,58 @@ def review_membership(request, membership_id):
         ]
     )
 
+    create_notification(
+        user_id=membership.student_id,
+        title=f"Club membership {decision.lower()}",
+        message=(
+            f"Your application to join '{club.name}' "
+            f"has been {decision.lower()}."
+        ),
+        notification_type="MEMBERSHIP_REVIEWED",
+    )
+
+    student = Users.objects.filter(
+        id=membership.student_id
+    ).first()
+
+    if student and student.email:
+        if decision == "APPROVED":
+            subject = (
+                f"CampusOS: Membership approved - {club.name}"
+            )
+            message = (
+                f"Hello {student.name or 'Student'},\n\n"
+                f"Your application to join {club.name} "
+                "has been approved!\n\n"
+                f"Club: {club.name}\n"
+                f"Category: {club.category}\n\n"
+                "You can log in to CampusOS to view your "
+                "club membership details.\n\n"
+                "Thank you,\n"
+                "CampusOS Team"
+            )
+        else:
+            subject = (
+                f"CampusOS: Membership update - {club.name}"
+            )
+            message = (
+                f"Hello {student.name or 'Student'},\n\n"
+                f"Your application to join {club.name} "
+                "has unfortunately been rejected.\n\n"
+                f"Club: {club.name}\n\n"
+                "You can log in to CampusOS to view your "
+                "membership status. If you have questions, "
+                "please contact the club administrator.\n\n"
+                "Thank you,\n"
+                "CampusOS Team"
+            )
+
+        send_notification_email(
+            recipient=student.email,
+            subject=subject,
+            message=message,
+        )
+
     return Response({
         "message": f"Membership {decision.lower()}",
         "membership": membership_data(membership),
@@ -357,7 +458,12 @@ def approve_club(request, club_id):
 
     if user.role not in ["FACULTY_COORDINATOR", "SYSTEM_ADMIN"]:
         return Response(
-            {"message": "Only faculty coordinators or system admins can approve clubs"},
+            {
+                "message": (
+                    "Only faculty coordinators or system admins "
+                    "can approve clubs"
+                )
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -395,7 +501,20 @@ def approve_club(request, club_id):
     club.status = "ACTIVE" if decision == "APPROVED" else "INACTIVE"
     club.save(update_fields=["status"])
 
+    if club.admin_id:
+        create_notification(
+            user_id=club.admin_id,
+            title=f"Club {decision.lower()}",
+            message=(
+                f"Your club '{club.name}' has been "
+                f"{decision.lower()}."
+            ),
+            notification_type="EVENT_APPROVAL",
+        )
+
     return Response({
         "message": f"Club {decision.lower()} successfully",
         "club": club_data(club),
     })
+
+
