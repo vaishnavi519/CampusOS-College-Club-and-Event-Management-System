@@ -1,185 +1,292 @@
 <div align="center">
 
-# CampusOS
+# 🎓 CampusOS
 
-### Campus Club & Event Management System
+### 🏫 Campus Club & Event Management System
 
-A full-stack web application for managing campus clubs, events, registrations, attendance, and notifications through role-based dashboards.
+**Discover · Organize · Participate · Grow**
 
-**Built with React · Vite · Django REST Framework · MySQL**
+A full-stack web application that brings campus clubs, events, registrations, attendance, and notifications together in one centralized platform.
+
+<br/>
+
+![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-Build%20Tool-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Django](https://img.shields.io/badge/Django-Backend-092E20?style=for-the-badge&logo=django&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+
+[📂 View Repository](https://github.com/vaishnavi519/CampusOS-College-Club-and-Event-Management-System)
 
 </div>
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
-- [Overview](#overview)
-- [Problem Statement](#problem-statement)
-- [Key Features](#key-features)
-- [User Roles](#user-roles)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Running the Application](#running-the-application)
-- [Testing](#testing)
-- [API Overview](#api-overview)
-- [Security and Configuration](#security-and-configuration)
-- [Future Improvements](#future-improvements)
-- [Project Repository](#project-repository)
+- [🌟 Overview](#-overview)
+- [🎯 Problem Statement](#-problem-statement)
+- [✨ Features](#-features)
+- [👥 User Roles](#-user-roles)
+- [🛠️ Technology Stack](#️-technology-stack)
+- [🏗️ System Architecture](#️-system-architecture)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Getting Started](#-getting-started)
+- [▶️ Running the Application](#️-running-the-application)
+- [🧪 Testing](#-testing)
+- [🔌 API Overview](#-api-overview)
+- [🔐 Security](#-security)
+- [🔮 Future Improvements](#-future-improvements)
 
-## Overview
+---
 
-CampusOS is a centralized platform designed to simplify how college clubs and events are managed. It brings student-facing activities and administrative workflows into one application, reducing reliance on scattered spreadsheets, paper forms, and chat messages.
+## 🌟 Overview
 
-Students can discover clubs and events, register for events, track their registrations, and receive notifications. Club administrators can manage their events and review registrations and attendance. Faculty coordinators and system administrators have role-specific access to supported management workflows.
+**CampusOS** is a centralized campus club and event management system designed to simplify the way college activities are organized and managed.
 
-## Problem Statement
+Traditional campus management often relies on spreadsheets, paper forms, and messaging groups. CampusOS brings supported workflows into one web application, helping students and administrators access information more efficiently.
 
-Campus clubs often coordinate events using multiple disconnected tools. This can make it difficult to keep participant records accurate, review registrations, track attendance, and communicate updates consistently.
+### 💡 What can you do with CampusOS?
 
-CampusOS aims to provide one organized workflow for:
+- 🎪 Explore campus clubs and events.
+- 📝 Register for events and track registrations.
+- 👥 Access club management workflows.
+- ✅ Review registrations and attendance.
+- 🔔 Receive in-app notifications.
+- 👤 Access personalized dashboards and profiles.
+- 🔐 Use features according to assigned roles and permissions.
 
-- Club and event information
-- Role-based access to management features
-- Event registration and cancellation
-- Registration and attendance tracking
-- In-app notifications
-- Centralized backend data and APIs
+---
 
-## Key Features
+## 🎯 Problem Statement
 
-### Student
+Managing college clubs and events using disconnected tools can lead to:
 
-- Browse available clubs and events.
-- View event details.
-- Register for events and view personal registrations.
-- View club membership information and application status where available.
-- Receive and review in-app notifications.
-- Access a role-specific dashboard and profile.
+- ❌ Inconsistent registration records
+- ❌ Difficult attendance tracking
+- ❌ Scattered event information
+- ❌ Communication gaps between students and organizers
+- ❌ Time-consuming administrative work
 
-### Club Administration
+### 💡 Our Solution
 
-- Access club-management features permitted for the administrator's club.
-- View events and event registrations.
-- Review attendee information.
-- Record and review attendance.
-- Follow registration and attendance status through the application.
+CampusOS provides a centralized platform for:
 
-### Faculty Coordination and System Administration
+- ✅ Club and event information
+- ✅ Role-based access control
+- ✅ Event registration workflows
+- ✅ Attendance management
+- ✅ In-app notifications
+- ✅ Centralized backend APIs and database operations
 
-- Role-specific access to the management workflows implemented in the application.
-- Support for oversight and administrative tasks according to assigned permissions.
+---
 
-### Authentication and Access Control
+## ✨ Features
 
-- Login and registration workflows.
-- JWT-based API authentication.
-- Role-aware frontend routes and backend permissions.
-- Password handling through the backend authentication implementation.
+<table>
+<tr>
+<td width="50%">
 
-## User Roles
+### 🎓 Student Portal
 
-| Role | Intended Use |
+- 🔎 Browse clubs and events
+- 📅 View event details
+- 📝 Register for events
+- 📋 Track personal registrations
+- 🔔 View notifications
+- 👤 Access profile information
+
+</td>
+<td width="50%">
+
+### 🏢 Club Administration
+
+- 🎪 Manage permitted club activities
+- 📅 Access event information
+- 👥 Review event registrations
+- ✅ Record attendance
+- 📊 Track registration status
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🧑‍🏫 Faculty Coordination
+
+- 📋 Access supported coordination workflows
+- 🗂️ Review relevant information
+- 🔐 Work within assigned permissions
+
+</td>
+<td width="50%">
+
+### ⚙️ System Administration
+
+- 🛠️ Access administrative workflows
+- 👥 Support platform management
+- 🔒 Use role-based permissions
+
+</td>
+</tr>
+</table>
+
+### 🔑 Authentication and Authorization
+
+- 🔐 Login and registration
+- 🎟️ JWT-based API authentication
+- 🛡️ Role-aware frontend routes
+- 🔒 Backend permission checks
+- 🔑 Backend-managed password handling
+
+---
+
+## 👥 User Roles
+
+| Icon | Role | Responsibilities |
+|---|---|---|
+| 🎓 | `STUDENT` | Discover clubs, register for events, and view personal information and notifications. |
+| 🏢 | `CLUB_ADMIN` | Manage permitted club activities, registrations, and attendance. |
+| 🧑‍🏫 | `FACULTY_COORDINATOR` | Access supported faculty coordination workflows. |
+| ⚙️ | `SYSTEM_ADMIN` | Access platform administration workflows. |
+
+> 🔐 Available actions depend on the user's assigned role and the permissions enforced by the backend.
+
+---
+
+## 🛠️ Technology Stack
+
+| Technology | Purpose |
 |---|---|
-| `STUDENT` | Discover clubs and events, register, and view personal information and notifications. |
-| `CLUB_ADMIN` | Manage permitted club activities, registrations, and attendance. |
-| `FACULTY_COORDINATOR` | Access faculty coordination workflows. |
-| `SYSTEM_ADMIN` | Access platform administration workflows. |
+| ⚛️ React | Frontend user interface |
+| ⚡ Vite | Frontend development and build tool |
+| 📡 Axios | HTTP requests and API communication |
+| 🐍 Python | Backend programming language |
+| 🌿 Django | Backend web framework |
+| 🔌 Django REST Framework | REST API development |
+| 🗄️ MySQL | Relational database |
+| 🔑 JWT | API authentication |
+| 🧪 Django Tests and Python Scripts | Testing |
+| 🐙 Git and GitHub | Version control |
 
-Available actions depend on the user's role and the permissions enforced by the backend.
+---
 
-## Technology Stack
+## 🏗️ System Architecture
 
-| Layer | Technologies |
-|---|---|
-| Frontend | React, Vite, JavaScript, HTML, CSS |
-| API Client | Axios |
-| Backend | Python, Django, Django REST Framework |
-| Database | MySQL |
-| Authentication | JWT-based authentication |
-| Testing | Django tests and standalone Python test scripts |
-| Version Control | Git and GitHub |
+CampusOS follows a frontend–backend architecture in which the React frontend communicates with Django REST APIs, and the backend interacts with MySQL.
 
-## Project Structure
+```mermaid
+flowchart TD
+    A["🎓 Student"] --> UI["⚛️ React Frontend"]
+    B["🏢 Club Admin"] --> UI
+    C["🧑‍🏫 Faculty Coordinator"] --> UI
+    D["⚙️ System Admin"] --> UI
 
-```text
-CampusOS/
-├── backend/
-│   ├── accounts/
-│   ├── attendance/
-│   ├── campusos/
-│   ├── clubs/
-│   ├── events/
-│   ├── notifications/
-│   ├── recommendations/
-│   ├── registrations/
-│   ├── reports/
-│   └── manage.py
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── services/
-│   ├── .env
-│   └── package.json
-├── test_cases/
-│   ├── test_campusos.py
-│   ├── test_case_10.py
-│   ├── test_login.py
-│   ├── test_event_registration.py
-│   └── ...
-├── manage.py
-├── models_existing.py
-└── README.md
+    UI --> AX["📡 Axios API Client"]
+    AX --> API["🔌 Django REST Framework"]
+    API --> AUTH["🔐 Authentication and Permissions"]
+    AUTH --> DB[("🗄️ MySQL Database")]
+
+    API --> CLUBS["🏢 Clubs and Events"]
+    API --> REG["📝 Registrations"]
+    API --> ATT["✅ Attendance"]
+    API --> NOTIF["🔔 Notifications"]
 ```
 
-The project structure may change as development continues. Keep Django's app-level `tests.py` files in their original installed-app folders so Django's default test discovery can find them.
+### 🔄 Application Workflow
 
-## Getting Started
+1. 👤 Users sign in through the React frontend.
+2. 📡 The frontend sends requests to Django REST APIs.
+3. 🔐 The backend authenticates users and checks permissions.
+4. 🗄️ Application data is retrieved from or stored in MySQL.
+5. 📱 The frontend displays the information available to each role.
 
-### Prerequisites
+---
 
-Install the following before running the application:
+## 📁 Project Structure
 
-- Python compatible with the project's installed Django dependencies
-- Node.js and npm
-- MySQL Server
-- Git
+```text
+CampusOS-Clean/
+│
+├── 📂 backend/
+│   ├── 📂 accounts/
+│   ├── 📂 attendance/
+│   ├── 📂 campusos/
+│   ├── 📂 clubs/
+│   ├── 📂 events/
+│   ├── 📂 notifications/
+│   ├── 📂 recommendations/
+│   ├── 📂 registrations/
+│   ├── 📂 reports/
+│   └── 📄 manage.py
+│
+├── 📂 frontend/
+│   ├── 📂 src/
+│   │   ├── 📂 components/
+│   │   ├── 📂 pages/
+│   │   └── 📂 services/
+│   ├── 📄 package.json
+│   └── 📄 .env
+│
+├── 📂 test_cases/
+│   ├── 📄 test_campusos.py
+│   ├── 📄 test_case_10.py
+│   ├── 📄 test_login.py
+│   ├── 📄 test_event_registration.py
+│   └── 📄 ...
+│
+├── 📄 manage.py
+├── 📄 models_existing.py
+└── 📄 README.md
+```
 
-### 1. Clone the Repository
+---
 
-```bash
+## 🚀 Getting Started
+
+### 📋 Prerequisites
+
+Before running CampusOS, make sure you have installed:
+
+- 🐍 Python
+- 📦 Node.js and npm
+- 🗄️ MySQL Server
+- 🐙 Git
+
+### 1️⃣ Clone the Repository
+
+Open PowerShell:
+
+```powershell
 git clone https://github.com/vaishnavi519/CampusOS-College-Club-and-Event-Management-System.git
+
 cd CampusOS-College-Club-and-Event-Management-System
 ```
 
-### 2. Configure the Database and Environment
-
-Configure the database connection using the settings defined in the backend. Make sure MySQL is running and the configured database exists.
-
-If the project uses environment variables locally, create the required environment file(s) based on the project's settings.
-
-**Never commit passwords, secret keys, access tokens, or production credentials.**
-
-### 3. Set Up the Python Environment
-
-From the project root in PowerShell:
+### 2️⃣ Create a Python Virtual Environment
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-Install the backend dependencies using the dependency file provided by the project. If `backend/requirements.txt` exists, run:
+### 3️⃣ Install Backend Dependencies
+
+If the project contains `backend/requirements.txt`, run:
 
 ```powershell
 pip install -r .\backend\requirements.txt
 ```
 
-If the requirements file is located elsewhere, use its actual path.
+Otherwise, use the dependency file provided in the repository.
 
-### 4. Apply Database Migrations
+### 4️⃣ Configure MySQL
+
+- 🗄️ Start the MySQL server.
+- 🛠️ Create the database configured in Django settings.
+- 🔑 Configure the database credentials.
+- 🔒 Keep passwords and secret keys out of GitHub.
+
+### 5️⃣ Apply Database Migrations
 
 From the project root:
 
@@ -188,42 +295,39 @@ $env:PYTHONPATH = "$PWD\backend"
 python manage.py migrate
 ```
 
-If the project uses a different database setup or migration workflow, follow the configuration in the repository.
+---
 
-## Running the Application
+## ▶️ Running the Application
 
-Run the backend and frontend in separate terminals.
+Run the backend and frontend in **two separate PowerShell terminals**.
 
-### Terminal 1 — Django Backend
-
-Open PowerShell and run:
+### 🖥️ Terminal 1 — Backend
 
 ```powershell
 cd C:\Users\Lenovo\Desktop\CampusOS
+
 .\.venv\Scripts\Activate.ps1
+
 $env:PYTHONPATH = "$PWD\backend"
+
 python manage.py runserver
 ```
 
-The development API server should be available at:
+🌐 **Backend:** http://127.0.0.1:8000/
 
-`http://127.0.0.1:8000/`
-
-### Terminal 2 — React Frontend
-
-Open a second PowerShell terminal:
+### 💻 Terminal 2 — Frontend
 
 ```powershell
 cd C:\Users\Lenovo\Desktop\CampusOS\frontend
+
 npm install
+
 npm run dev
 ```
 
-Open the local URL printed by Vite, usually:
+🌐 **Frontend:** http://localhost:5173/
 
-`http://localhost:5173/`
-
-### Frontend API Configuration
+### 🔗 API Configuration
 
 The frontend API URL is configured in `frontend/.env`:
 
@@ -231,87 +335,87 @@ The frontend API URL is configured in `frontend/.env`:
 VITE_API_URL=http://127.0.0.1:8000/api
 ```
 
-Restart the Vite development server after changing frontend environment variables.
+> 💡 Restart the Vite development server after changing environment variables.
 
-## Testing
+---
 
-CampusOS contains Django app tests and standalone test scripts in `test_cases/`.
+## 🧪 Testing
 
-### Run Django Tests
+CampusOS includes Django tests and standalone Python test scripts.
 
-From the project root, with the virtual environment activated:
+### 🧪 Run Django Tests
+
+From the project root:
 
 ```powershell
 $env:PYTHONPATH = "$PWD\backend"
 python manage.py test
 ```
 
-Django's automatic test discovery depends on tests being located in discoverable app and module paths. Keep the original app-level `tests.py` files in place.
-
-### Run an Individual Standalone Test
-
-Examples:
+### 🎯 Run Individual Test Scripts
 
 ```powershell
 python .\test_cases\test_login.py
+
 python .\test_cases\test_event_registration.py
+
 python .\test_cases\test_case_10.py
 ```
 
-Some standalone scripts may require the frontend and backend to be running, a browser driver, or test credentials.
+## 🔌 API Overview
 
-Run scripts individually and review their actual output. Report a test as passing only when it completes successfully.
+The backend exposes REST endpoints under `/api/`.
 
-## API Overview
+| Icon | Area | Example Endpoint | Purpose |
+|---|---|---|---|
+| 🔑 | Authentication | `POST /api/auth/login` | Authenticate a user |
+| 📝 | Registration | `POST /api/auth/register` | Register a user |
+| 🏢 | Clubs | `GET /api/clubs` | List clubs |
+| 📅 | Events | `GET /api/events` | List events |
+| 📋 | My Registrations | `GET /api/my-registrations` | View personal registrations |
+| 📝 | Event Registration | `POST /api/events/{event_id}/register` | Register for an event |
+| 👥 | Event Registrations | `GET /api/events/{event_id}/registrations` | View event registrations |
+| ✅ | Attendance | `GET /api/events/{event_id}/attendance` | View attendance |
+| 🔔 | Notifications | `GET /api/notifications` | View notifications |
 
-The backend exposes REST endpoints under `/api/`. Examples of routes used by the application include:
-
-| Area | Endpoint | Purpose |
-|---|---|---|
-| Authentication | `POST /api/auth/login` | Authenticate a user |
-| Authentication | `POST /api/auth/register` | Register a user |
-| Clubs | `GET /api/clubs` | List clubs |
-| Events | `GET /api/events` | List events |
-| Registrations | `GET /api/my-registrations` | View the current user's registrations |
-| Event Registration | `POST /api/events/{event_id}/register` | Register for an event |
-| Event Registrations | `GET /api/events/{event_id}/registrations` | View event registrations, subject to permissions |
-| Attendance | `GET /api/events/{event_id}/attendance` | View attendance, subject to permissions |
-| Notifications | `GET /api/notifications` | List the current user's notifications |
-
-Requests that require authentication must include a valid access token.
-
-The backend's URL configuration is the source of truth for the complete endpoint list and supported HTTP methods.
-
-## Security and Configuration
-
-- Keep local environment files and secrets out of Git.
-- Do not place real user passwords or access tokens in the README.
-- Use non-production test accounts for demonstrations.
-- Do not expose the development server directly to the public internet.
-- Backend permissions must enforce access control; frontend route guards alone are not sufficient.
-- Review error messages and logs before sharing screenshots publicly.
-
-## Future Improvements
-
-Potential next steps include:
-
-- Expand automated integration and end-to-end test coverage.
-- Improve API error handling and validation.
-- Add more reporting and export options where required.
-- Improve accessibility and responsive layouts.
-- Add continuous integration checks for formatting, tests, and build validation.
-- Document deployment configuration and environment variables.
+🔐 Authenticated requests must include a valid access token.
 
 ---
 
-## Project Repository
+## 🔐 Security
 
-**GitHub:** [CampusOS — Campus Club & Event Management System](https://github.com/vaishnavi519/CampusOS-College-Club-and-Event-Management-System)
+- 🔒 Never commit passwords, access tokens, or secret keys.
+- 👤 Use test accounts for demonstrations.
+- 🛡️ Enforce access control on the backend.
+- 🚫 Do not expose the development server directly to the public internet.
+- 🧹 Review logs and error messages before sharing screenshots.
+- 🔑 Keep sensitive configuration in environment-specific files.
 
 ---
+
+## 🔮 Future Improvements
+
+- 🧪 Expand automated integration and end-to-end testing.
+- 📊 Add more reporting and export options.
+- ♿ Improve accessibility.
+- 📱 Enhance responsive layouts.
+- ⚙️ Add continuous integration checks.
+- 🚀 Document deployment and production configuration.
+
+---
+
+## 📂 Project Repository
 
 <div align="center">
 
-*CampusOS — bringing campus clubs, events, registrations, and attendance into one organized platform.*
+### 🎓 CampusOS
+
+**Campus Club & Event Management System**
+
+A centralized platform for campus clubs, events, registrations, and attendance.
+
+[![GitHub](https://img.shields.io/badge/GitHub-View%20Project-181717?style=for-the-badge&logo=github)](https://github.com/vaishnavi519/CampusOS-College-Club-and-Event-Management-System)
+
+**Built with ❤️ using React, Django REST Framework, and MySQL.**
 
 </div>
