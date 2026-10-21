@@ -71,6 +71,4 @@ export const CLUB_CATEGORIES = [
 export const STORAGE_KEYS = {
   token: 'campusos.token',
   user: 'campusos.user',
-  demoState: 'campusos.demo.state',
-  demoSession: 'campusos.demo.session',
 };
